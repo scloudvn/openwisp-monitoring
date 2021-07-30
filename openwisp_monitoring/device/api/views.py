@@ -3,6 +3,7 @@ import logging
 import uuid
 from collections import OrderedDict
 from copy import deepcopy
+from datetime import datetime
 from io import StringIO
 
 from django.conf import settings
@@ -194,6 +195,8 @@ class DeviceMetricView(GenericAPIView):
         write metrics to database
         """
         # saves raw device data
+        time_obj = request.query_params.get('time')
+        time = datetime.strptime(time_obj, '%d-%m-%Y_%H:%M:%S.%f')
         self.instance.save_data()
         data = self.instance.data
         ct = ContentType.objects.get_for_model(Device)
@@ -223,7 +226,7 @@ class DeviceMetricView(GenericAPIView):
                     name=name,
                     key=ifname,
                 )
-                metric.write(field_value, extra_values=extra_values)
+                metric.write(field_value, time=time, extra_values=extra_values)
                 if created:
                     self._create_traffic_chart(metric)
             try:

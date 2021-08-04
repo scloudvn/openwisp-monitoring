@@ -38,7 +38,7 @@ class TestDeviceMonitoringMixin(CreateConfigTemplateMixin, TestMonitoringMixin):
 
     def _post_data(self, id, key, data, time=None):
         if not time:
-            time = now().strftime('%d-%m-%Y_%H:%M:%S.%f')
+            time = now().utcnow().strftime('%d-%m-%Y_%H:%M:%S.%f')
         url = self._url(id, key, time)
         netjson = json.dumps(data)
         return self.client.post(url, netjson, content_type='application/json')

@@ -11,6 +11,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db.models import Count, Q
 from django.http import HttpResponse
+from pytz import UTC
 from pytz import timezone as tz
 from pytz.exceptions import UnknownTimeZoneError
 from rest_framework import serializers, status
@@ -197,6 +198,7 @@ class DeviceMetricView(GenericAPIView):
         # saves raw device data
         time_obj = request.query_params.get('time')
         time = datetime.strptime(time_obj, '%d-%m-%Y_%H:%M:%S.%f')
+        time = time.replace(tzinfo=UTC)
         self.instance.save_data()
         data = self.instance.data
         ct = ContentType.objects.get_for_model(Device)

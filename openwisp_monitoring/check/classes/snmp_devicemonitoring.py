@@ -6,7 +6,6 @@ from swapper import load_model
 
 from openwisp_monitoring.device.api.views import MetricChartsMixin
 
-from .. import settings as app_settings
 from .base import BaseCheck
 
 Chart = load_model('monitoring', 'Chart')
@@ -35,28 +34,15 @@ class SnmpDeviceMonitoring(BaseCheck, MetricChartsMixin):
     @cached_property
     def netengine_instance(self):
         ip = self._get_ip()
-        return OpenWRT(host=ip, **self.credential_params)
+        return OpenWRT(host=ip, **self._get_credential_params())
 
-    @cached_property
-    def credential_params(self):
-        params = {}
+    def _get_credential_params(self):
         cred = Credentials.objects.filter(
             deviceconnection__device_id=self.related_object,
             connector='openwisp_controller.connection.connectors.snmp.Snmp',
         ).last()
         if cred is not None:
-            params.update(cred.params)
-        return params
-
-    def _get_ip(self):
-        """
-        Figures out ip to use or fails raising OperationalError
-        """
-        device = self.related_object
-        ip = device.management_ip
-        if not ip and not app_settings.MANAGEMENT_IP_ONLY:
-            ip = device.last_ip
-        return ip
+            return cred.params
 
     def _init_previous_data(self):
         """

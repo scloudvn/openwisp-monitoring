@@ -6,7 +6,6 @@ from jsonschema.exceptions import ValidationError as SchemaError
 from swapper import load_model
 
 from ... import settings as monitoring_settings
-from .. import settings as app_settings
 from ..exceptions import OperationalError
 from .base import BaseCheck
 
@@ -122,16 +121,6 @@ class Ping(BaseCheck):
         Gets specified param or its default value according to the schema
         """
         return self.params.get(param, self.schema['properties'][param]['default'])
-
-    def _get_ip(self):
-        """
-        Figures out ip to use or fails raising OperationalError
-        """
-        device = self.related_object
-        ip = device.management_ip
-        if not ip and not app_settings.MANAGEMENT_IP_ONLY:
-            ip = device.last_ip
-        return ip
 
     def _command(self, command):
         """
